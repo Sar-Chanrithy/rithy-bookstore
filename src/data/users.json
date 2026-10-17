@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name": "Admin Bookoe",
+    "email": "admin@bookoe.com",
+    "password": "admin123",
+    "role": "Administrator",
+    "initials": "AD",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "John Doe",
+    "email": "reader.john@bookoe.com",
+    "password": "password123",
+    "role": "VIP Member",
+    "initials": "JD",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Sok San",
+    "email": "soksan@bookoe.kh",
+    "password": "password123",
+    "role": "Khmer Reader Club",
+    "initials": "SS",
+    "createdAt": "2026-01-02T00:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "name": "Thyy",
+    "email": "rithysar78@gmail.com",
+    "password": "123456789",
+    "role": "VIP Member",
+    "initials": "T",
+    "createdAt": "2026-10-15T11:08:15.023Z"
+  },
+  {
+    "id": 5,
+    "name": "Thyy1",
+    "email": "rithy123@gmail.com",
+    "password": "admin123",
+    "role": "VIP Member",
+    "initials": "T",
+    "createdAt": "2026-10-15T13:18:01.259Z"
+  },
+  {
+    "id": 6,
+    "name": "chanrah",
+    "email": "charah123@gmail.com",
+    "password": "123123123",
+    "role": "VIP Member",
+    "initials": "C",
+    "createdAt": "2026-10-16T10:52:25.734Z"
+  }
+]
