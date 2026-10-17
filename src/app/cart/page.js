@@ -24,7 +24,9 @@ import {
   Minus
 } from 'lucide-react';
 
-export default function CartPage() {
+export const dynamic = 'force-dynamic';
+
+function CartContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const addedBookId = searchParams.get('add');
@@ -858,5 +860,18 @@ export default function CartPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CartPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="bookoe-container" style={{ padding: '5rem 1.5rem', textAlign: 'center' }}>
+        <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🛒</div>
+        <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Loading Cart...</p>
+      </div>
+    }>
+      <CartContent />
+    </React.Suspense>
   );
 }
