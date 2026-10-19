@@ -219,7 +219,8 @@ export default function Navbar() {
                 ❓ {t('faqsHelp', 'FAQs & Help')}
               </button>
             </div>
-          )}
+          </>
+        )}
         </div>
 
         {/* Center: Wide Search Bar */}

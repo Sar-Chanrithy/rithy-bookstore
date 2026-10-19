@@ -541,12 +541,16 @@ button, input, select, textarea {
 }
 
 .bookoe-breadcrumb a {
-  color: var(--text-muted);
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
   transition: color 0.2s;
 }
 
 .bookoe-breadcrumb a:hover {
-  color: var(--primary);
+  color: var(--primary-hover);
+  text-decoration: underline;
 }
 
 .bookoe-breadcrumb__sep {

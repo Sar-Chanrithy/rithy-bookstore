@@ -9,7 +9,9 @@ export default async function CategoriesPage() {
   return (
     <div className="bookoe-container" style={{ padding: '2rem 1.5rem 5rem' }}>
       <nav className="bookoe-breadcrumb">
-        <Link href="/">Home</Link>
+        <Link href="/" style={{ cursor: 'pointer', fontWeight: 700, color: 'var(--primary)', textDecoration: 'none' }}>
+          🏠 Home
+        </Link>
         <span className="bookoe-breadcrumb__sep">/</span>
         <span className="bookoe-breadcrumb__active">Categories</span>
       </nav>

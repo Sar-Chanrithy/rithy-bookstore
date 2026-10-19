@@ -39,9 +39,6 @@ export function ensureCoversCopied() {
         fs.copyFileSync(item.src, item.dest);
       }
     }
-
-    // Download online covers for new catalog additions
-    downloadOnlineCovers();
   } catch (err) {
     console.warn('Cover copy notice:', err.message);
   }
@@ -219,8 +216,6 @@ export async function downloadOnlineCovers() {
   }
 }
 
-ensureCoversCopied();
-
 const DEFAULT_CATEGORIES = [
   { id: 'action', name: 'Action', icon: '⚡' },
   { id: 'adventure', name: 'Adventure', icon: '🧭' },
@@ -272,7 +267,6 @@ function mapPgRowToBook(row) {
  * Read books from JSON file safely (Fallback & Local store)
  */
 function readBooksFromFile() {
-  ensureCoversCopied();
   try {
     if (fs.existsSync(DB_PATH)) {
       const data = fs.readFileSync(DB_PATH, 'utf-8');
