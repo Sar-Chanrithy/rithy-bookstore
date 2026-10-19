@@ -1072,4 +1072,22 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 
+-- ========================================================
+-- 8. Contacts Table (Contact Bookoe Support - Auto 30-Day Purge)
+-- ========================================================
+CREATE TABLE IF NOT EXISTS contacts (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'unread',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_contacts_created_at ON contacts(created_at);
+
+-- Auto-delete query executed periodically by the app:
+-- DELETE FROM contacts WHERE created_at < (CURRENT_TIMESTAMP - INTERVAL '30 days');
+
+
 

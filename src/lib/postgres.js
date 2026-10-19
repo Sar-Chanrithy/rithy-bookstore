@@ -43,6 +43,9 @@ export async function getPool() {
           ssl: (connStr.includes('localhost') || connStr.includes('127.0.0.1'))
             ? false
             : { rejectUnauthorized: false },
+          max: 10,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 5000,
         });
       } else {
         pool = new pg.Pool({

@@ -4,7 +4,6 @@ import path from 'path';
 import { query as pgQuery, isPostgresConfigured } from './postgres';
 import { ensureUsersTableSynced } from './userDb';
 import { ensureSubscribersTableSynced } from './subscriberDb';
-import { ensureOrdersTableSynced } from './orderDb';
 
 const DB_PATH = path.join(process.cwd(), 'src', 'data', 'books.json');
 
@@ -304,11 +303,11 @@ function writeBooksToFile(books) {
 
 let pgSynced = false;
 async function ensurePgSynced() {
-  if (!isPostgresConfigured()) return;
+  if (pgSynced || !isPostgresConfigured()) return;
+  pgSynced = true;
   try {
     await ensureUsersTableSynced();
     await ensureSubscribersTableSynced();
-    await ensureOrdersTableSynced();
     // 1. Ensure books table exists
     await pgQuery(`
       CREATE TABLE IF NOT EXISTS books (
@@ -399,8 +398,6 @@ export async function getBooks(options = {}) {
     page,
     pageSize = 12,
   } = options;
-
-  downloadOnlineCovers();
 
   // 1. Try PostgreSQL if configured
   if (isPostgresConfigured()) {

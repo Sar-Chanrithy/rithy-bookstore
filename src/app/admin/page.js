@@ -18,7 +18,10 @@ import {
   DollarSign,
   Upload,
   Image as ImageIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Mail,
+  MessageSquare,
+  Clock
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -50,6 +53,11 @@ export default function AdminPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Support Messages Modal State
+  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [formData, setFormData] = useState({
     id: '',
     title: '',
@@ -327,6 +335,43 @@ export default function AdminPage() {
     }
   };
 
+  const fetchMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const res = await fetch('/api/contact');
+      const data = await res.json();
+      if (data.success) {
+        setMessages(data.contacts || []);
+      }
+    } catch (err) {
+      console.error('Error fetching support messages:', err);
+      showToast('Failed to load support messages', 'error');
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const handleOpenMessages = () => {
+    setIsMessagesOpen(true);
+    fetchMessages();
+  };
+
+  const handleDeleteMessage = async (id) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+    try {
+      const res = await fetch(`/api/contact?id=${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setMessages((prev) => prev.filter((m) => String(m.id) !== String(id)));
+        showToast('Support message deleted successfully!');
+      } else {
+        showToast(data.error || 'Failed to delete message', 'error');
+      }
+    } catch (err) {
+      showToast('Error deleting message', 'error');
+    }
+  };
+
   // Filtered books for table
   const filteredBooks = books.filter((book) => {
     const matchesSearch =
@@ -422,6 +467,29 @@ export default function AdminPage() {
           >
             <Sparkles size={18} />
             <span>{syncing ? 'Importing...' : 'Sync 43 Books to Cloud ☁️'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            onClick={handleOpenMessages}
+            style={{ 
+              width: 'auto', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem', 
+              padding: '0.75rem 1.3rem', 
+              margin: 0,
+              background: '#f8fafc',
+              color: '#0f172a',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: '0.88rem'
+            }}
+          >
+            <Mail size={18} color="var(--primary)" />
+            <span>Support Inquiries 📩</span>
           </button>
 
           <button 
@@ -947,6 +1015,115 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Support Messages Modal (Auto 30-Day Purge) */}
+      {isMessagesOpen && (
+        <div className="bookoe-modal-backdrop" onClick={() => setIsMessagesOpen(false)}>
+          <div 
+            className="bookoe-modal" 
+            style={{ maxWidth: 680, maxHeight: '90vh', overflowY: 'auto' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bookoe-modal__header">
+              <div>
+                <h3 className="bookoe-modal__title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <Mail size={22} color="var(--primary)" />
+                  <span>Customer Support Messages</span>
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '0.25rem', fontSize: '0.78rem', color: '#16a34a', fontWeight: 600 }}>
+                  <Clock size={13} />
+                  <span>Auto-delete: Messages are automatically removed after 30 days</span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="bookoe-modal__close"
+                onClick={() => setIsMessagesOpen(false)}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ padding: '1rem 0' }}>
+              {loadingMessages ? (
+                <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+                  Loading support inquiries... ⏳
+                </div>
+              ) : messages.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+                  <MessageSquare size={44} color="#94a3b8" style={{ margin: '0 auto 0.75rem' }} />
+                  <h4 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: 700, marginBottom: '0.35rem' }}>No Inquiries Yet</h4>
+                  <p style={{ fontSize: '0.85rem' }}>Messages sent through &quot;Contact Bookoe Support&quot; will appear here.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {messages.map((msg) => (
+                    <div 
+                      key={msg.id}
+                      style={{
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '1.1rem',
+                        boxShadow: 'var(--shadow-sm)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{msg.name}</strong>
+                          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>&bull; {msg.email}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-subtle)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-pill)' }}>
+                            {msg.createdAt ? new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            title="Delete message"
+                            style={{
+                              background: '#fee2e2',
+                              color: '#dc2626',
+                              border: 'none',
+                              padding: '0.35rem 0.6rem',
+                              borderRadius: 'var(--radius-xs)',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                            }}
+                          >
+                            <Trash2 size={13} /> Delete
+                          </button>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: '0.86rem', color: 'var(--text-body)', margin: 0, lineHeight: 1.5, background: 'var(--bg-subtle)', padding: '0.75rem', borderRadius: 'var(--radius-xs)' }}>
+                        {msg.message}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="bookoe-modal__actions" style={{ justifyContent: 'flex-end', marginTop: '1rem' }}>
+              <button
+                type="button"
+                className="bookoe-btn-reset"
+                style={{ width: 'auto', padding: '0.65rem 1.25rem' }}
+                onClick={() => setIsMessagesOpen(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

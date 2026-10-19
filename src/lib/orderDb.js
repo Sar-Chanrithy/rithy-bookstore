@@ -111,56 +111,11 @@ export async function createOrder(data) {
     createdAt: now,
   };
 
-  // 1. Send Telegram Notification
+  // 1. Send Telegram Notification (Orders are dispatched directly to Telegram only)
   const telegramRes = await sendTelegramOrderNotification(orderRecord);
   orderRecord.telegramSent = Boolean(telegramRes.sent);
 
-  // 2. Persist to PostgreSQL if configured
-  if (isPostgresConfigured()) {
-    try {
-      if (!ordersTableSynced) {
-        await ensureOrdersTableSynced();
-      }
-
-      const pgRes = await pgQuery(
-        `
-        INSERT INTO orders (
-          order_number, customer_name, customer_phone, customer_telegram,
-          delivery_address, order_note, payment_method, items,
-          subtotal, shipping, discount, total, status, telegram_sent
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-        RETURNING *
-      `,
-        [
-          orderRecord.orderNumber,
-          orderRecord.customerName,
-          orderRecord.customerPhone,
-          orderRecord.customerTelegram,
-          orderRecord.deliveryAddress,
-          orderRecord.orderNote,
-          orderRecord.paymentMethod,
-          JSON.stringify(orderRecord.items),
-          orderRecord.subtotal,
-          orderRecord.shipping,
-          orderRecord.discount,
-          orderRecord.total,
-          orderRecord.status,
-          orderRecord.telegramSent,
-        ]
-      );
-
-      if (pgRes.rows && pgRes.rows.length > 0) {
-        orderRecord.id = pgRes.rows[0].id;
-      }
-    } catch (pgErr) {
-      console.warn('PostgreSQL order insert warning (falling back to JSON):', pgErr.message);
-    }
-  }
-
-  // 3. Persist to JSON file
-  const localOrders = readOrdersFromFile();
-  localOrders.unshift(orderRecord);
-  writeOrdersToFile(localOrders);
+  // Note: Orders are NOT stored in PostgreSQL or JSON database as requested (Show only on Telegram)
 
   return {
     success: true,

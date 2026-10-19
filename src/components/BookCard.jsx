@@ -35,7 +35,19 @@ export default function BookCard({ book }) {
 
   return (
     <div className="bookoe-card">
-      <Link href={`/books/${book.id}`} style={{ display: 'contents' }}>
+      <Link 
+        href={`/books/${book.id}`} 
+        style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          flex: 1, 
+          width: '100%', 
+          height: '100%', 
+          textDecoration: 'none', 
+          color: 'inherit',
+          cursor: 'pointer' 
+        }}
+      >
         {/* Book Cover with artistic gradient or real cover image */}
         <div 
           className="bookoe-card__cover"

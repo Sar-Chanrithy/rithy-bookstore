@@ -156,3 +156,50 @@ export async function sendTelegramOrderNotification(order) {
     };
   }
 }
+
+/**
+ * Format Support Contact inquiry for Telegram HTML
+ */
+export function formatTelegramContactHtml({ name, email, message }) {
+  const timeStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' });
+  return `
+📩 <b>NEW CONTACT SUPPORT MESSAGE</b>
+━━━━━━━━━━━━━━━━━━
+👤 <b>From:</b> ${escapeHtml(name)}
+✉️ <b>Email:</b> ${escapeHtml(email)}
+🕒 <b>Time:</b> ${timeStr}
+
+💬 <b>Message:</b>
+${escapeHtml(message)}
+━━━━━━━━━━━━━━━━━━
+🌐 <b>Bookoe Bookstore Support</b>
+`.trim();
+}
+
+/**
+ * Send contact inquiry notification to Telegram
+ */
+export async function sendTelegramContactNotification({ name, email, message }) {
+  const { botToken, chatId } = getTelegramConfig();
+
+  try {
+    const htmlMessage = formatTelegramContactHtml({ name, email, message });
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: htmlMessage,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      }),
+    });
+
+    const data = await response.json();
+    return { sent: Boolean(data.ok) };
+  } catch (err) {
+    console.error('Error sending Telegram contact notice:', err.message);
+    return { sent: false, error: err.message };
+  }
+}
+

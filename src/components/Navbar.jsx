@@ -60,6 +60,11 @@ export default function Navbar() {
     }
   };
 
+  const handleMenuNavigate = (href) => {
+    setIsMenuOpen(false);
+    router.push(href);
+  };
+
   const selectLanguage = (lang) => {
     setCurrentLang(lang.code);
     setIsLangOpen(false);
@@ -95,66 +100,84 @@ export default function Navbar() {
           </button>
 
           {isMenuOpen && (
-            <div 
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 8px)',
-                left: 0,
-                width: 240,
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-light)',
-                borderRadius: 'var(--radius-md)',
-                boxShadow: 'var(--shadow-md)',
-                padding: '0.5rem',
-                zIndex: 200,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.25rem',
-                animation: 'fadeIn 0.15s ease-out',
-              }}
-            >
-              <Link 
-                href="/" 
-                onClick={() => setIsMenuOpen(false)}
-                style={{ padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-xs)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', display: 'block' }}
+            <>
+              <div 
+                style={{ position: 'fixed', inset: 0, zIndex: 190 }} 
+                onClick={() => setIsMenuOpen(false)} 
+              />
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  left: 0,
+                  width: 240,
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: 'var(--shadow-md)',
+                  padding: '0.5rem',
+                  zIndex: 200,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  animation: 'fadeIn 0.15s ease-out',
+                }}
               >
-                🏠 {t('home', 'Home')} / {t('books', 'All Books')}
-              </Link>
-              <Link 
-                href="/categories" 
-                onClick={() => setIsMenuOpen(false)}
-                style={{ padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-xs)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', display: 'block' }}
-              >
-                📚 {t('allCategories', 'Browse Categories')}
-              </Link>
-              <Link 
-                href="/?onSale=true" 
-                onClick={() => setIsMenuOpen(false)}
-                style={{ padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-xs)', fontSize: '0.85rem', fontWeight: 600, color: '#ff6b6b', display: 'block' }}
-              >
-                🏷️ {t('booksOnSale', 'Books on Sale')}
-              </Link>
-              {user?.role === 'Administrator' && (
-                <Link
-                  href="/admin"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    padding: '0.55rem 0.85rem',
-                    borderRadius: 'var(--radius-xs)',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    color: '#1d4ed8',
-                    background: 'var(--primary-light)',
-                    border: '1px solid var(--border-light)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
+                <Link 
+                  href="/" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuNavigate('/');
                   }}
+                  style={{ padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-xs)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', cursor: 'pointer' }}
                 >
-                  <Shield size={15} color="#1d4ed8" />
-                  <span>{t('adminDashboard', 'Admin Dashboard (CRUD)')}</span>
+                  🏠 {t('home', 'Home')} / {t('books', 'All Books')}
                 </Link>
-              )}
+                <Link 
+                  href="/categories" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuNavigate('/categories');
+                  }}
+                  style={{ padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-xs)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', cursor: 'pointer' }}
+                >
+                  📚 {t('allCategories', 'Browse Categories')}
+                </Link>
+                <Link 
+                  href="/?onSale=true" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuNavigate('/?onSale=true');
+                  }}
+                  style={{ padding: '0.55rem 0.85rem', borderRadius: 'var(--radius-xs)', fontSize: '0.85rem', fontWeight: 600, color: '#ff6b6b', display: 'block', cursor: 'pointer' }}
+                >
+                  🏷️ {t('booksOnSale', 'Books on Sale')}
+                </Link>
+                {user?.role === 'Administrator' && (
+                  <Link
+                    href="/admin"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleMenuNavigate('/admin');
+                    }}
+                    style={{
+                      padding: '0.55rem 0.85rem',
+                      borderRadius: 'var(--radius-xs)',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      color: '#1d4ed8',
+                      background: 'var(--primary-light)',
+                      border: '1px solid var(--border-light)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Shield size={15} color="#1d4ed8" />
+                    <span>{t('adminDashboard', 'Admin Dashboard (CRUD)')}</span>
+                  </Link>
+                )}
               <button
                 type="button"
                 onClick={() => {
@@ -318,10 +341,15 @@ export default function Navbar() {
             </div>
 
             {isLangOpen && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 8px)',
+              <>
+                <div 
+                  style={{ position: 'fixed', inset: 0, zIndex: 190 }} 
+                  onClick={() => setIsLangOpen(false)} 
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
                   right: 0,
                   width: 205,
                   background: 'var(--bg-card)',
@@ -370,7 +398,8 @@ export default function Navbar() {
                   );
                 })}
               </div>
-            )}
+            </>
+          )}
           </div>
         </div>
       </div>

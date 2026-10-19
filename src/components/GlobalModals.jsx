@@ -48,6 +48,10 @@ export default function GlobalModals() {
 
   const [faqOpenIndex, setFaqOpenIndex] = useState(0);
   const [contactSent, setContactSent] = useState(false);
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [isContactSubmitting, setIsContactSubmitting] = useState(false);
 
   // Auth modal state
   const [authTab, setAuthTab] = useState('signin'); // 'signin' | 'signup'
@@ -70,9 +74,14 @@ export default function GlobalModals() {
       setAuthEmail('');
       setAuthPassword('');
       setAuthName('');
-      setShowPassword(false);
+    } else if (activeModal === 'contact') {
+      setContactName(user?.name || '');
+      setContactEmail(user?.email || '');
+      setContactMessage('');
+      setContactSent(false);
+      setIsContactSubmitting(false);
     }
-  }, [activeModal]);
+  }, [activeModal, user]);
 
   const switchAuthTab = (tab) => {
     setAuthTab(tab);
@@ -138,14 +147,41 @@ export default function GlobalModals() {
     },
   ];
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    setContactSent(true);
-    showToast('Your message has been sent to Bookoe support team! ✉️');
-    setTimeout(() => {
-      setContactSent(false);
-      setActiveModal(null);
-    }, 2000);
+    if (!contactName.trim() || !contactEmail.trim() || !contactMessage.trim()) {
+      showToast('Please fill in all contact fields ⚠️');
+      return;
+    }
+
+    setIsContactSubmitting(true);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: contactName.trim(),
+          email: contactEmail.trim(),
+          message: contactMessage.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setContactSent(true);
+        showToast('Your message has been sent to Bookoe support team! ✉️');
+        setTimeout(() => {
+          setContactSent(false);
+          setActiveModal(null);
+        }, 2200);
+      } else {
+        showToast(data.error || 'Failed to send message ⚠️');
+      }
+    } catch (err) {
+      showToast('Error sending message. Please try again! ⚠️');
+    } finally {
+      setIsContactSubmitting(false);
+    }
   };
 
   return (
@@ -616,7 +652,8 @@ export default function GlobalModals() {
                     type="text"
                     required
                     placeholder="John Doe"
-                    defaultValue={user?.name || ''}
+                    value={contactName}
+                    onChange={(e) => setContactName(e.target.value)}
                     style={{ width: '100%', padding: '0.7rem 0.9rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)', background: 'var(--bg-input)', color: 'var(--text-main)', fontSize: '0.85rem' }}
                   />
                 </div>
@@ -628,7 +665,8 @@ export default function GlobalModals() {
                     type="email"
                     required
                     placeholder="john@example.com"
-                    defaultValue={user?.email || ''}
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
                     style={{ width: '100%', padding: '0.7rem 0.9rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)', background: 'var(--bg-input)', color: 'var(--text-main)', fontSize: '0.85rem' }}
                   />
                 </div>
@@ -640,15 +678,18 @@ export default function GlobalModals() {
                     required
                     rows={4}
                     placeholder="Tell us about your order or question..."
+                    value={contactMessage}
+                    onChange={(e) => setContactMessage(e.target.value)}
                     style={{ width: '100%', padding: '0.7rem 0.9rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)', background: 'var(--bg-input)', color: 'var(--text-main)', fontSize: '0.85rem', resize: 'vertical' }}
                   />
                 </div>
                 <button
                   type="submit"
+                  disabled={isContactSubmitting}
                   className="bookoe-btn-primary"
-                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem', fontWeight: 800, marginTop: '0.25rem' }}
+                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem', fontWeight: 800, marginTop: '0.25rem', opacity: isContactSubmitting ? 0.7 : 1, cursor: isContactSubmitting ? 'not-allowed' : 'pointer' }}
                 >
-                  Send Message
+                  {isContactSubmitting ? 'Sending Message... ⏳' : 'Send Message'}
                 </button>
 
                 <div style={{ marginTop: '0.5rem', padding: '0.75rem', borderRadius: 'var(--radius-sm)', background: 'var(--bg-subtle)', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>

@@ -1031,12 +1031,16 @@ button, input, select, textarea {
   gap: 0.85rem;
   padding: 1rem;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
   z-index: 4;
 }
 
 .bookoe-card:hover .bookoe-card__overlay {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .bookoe-card__overlay-price {

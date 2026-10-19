@@ -31,10 +31,45 @@ function writeSubscribersToFile(subscribers) {
   }
 }
 
+/**
+ * Auto-delete subscribers older than 2 days (48 hours)
+ */
+export async function autoDeleteExpiredSubscribers() {
+  const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  // 1. Delete from PostgreSQL (older than 2 days)
+  if (isPostgresConfigured()) {
+    try {
+      await pgQuery(`
+        DELETE FROM subscribers 
+        WHERE subscribed_at < (CURRENT_TIMESTAMP - INTERVAL '2 days')
+      `);
+    } catch (err) {
+      console.warn('Auto delete expired subscribers DB notice:', err.message);
+    }
+  }
+
+  // 2. Delete from local JSON file (older than 2 days)
+  try {
+    const fileSubs = readSubscribersFromFile();
+    const activeSubs = fileSubs.filter((s) => {
+      const subTime = s.subscribedAt ? new Date(s.subscribedAt).getTime() : 0;
+      return (now - subTime) <= TWO_DAYS_MS;
+    });
+    if (activeSubs.length !== fileSubs.length) {
+      writeSubscribersToFile(activeSubs);
+    }
+  } catch (err) {
+    console.warn('Auto delete expired subscribers File notice:', err.message);
+  }
+}
+
 let tableSynced = false;
 
 export async function ensureSubscribersTableSynced() {
-  if (!isPostgresConfigured()) return;
+  if (tableSynced || !isPostgresConfigured()) return;
+  tableSynced = true;
   try {
     // 1. Create subscribers table in PostgreSQL if not exists
     await pgQuery(`
@@ -46,7 +81,10 @@ export async function ensureSubscribersTableSynced() {
       );
     `);
 
-    // 2. Ensure all file subscribers exist in PostgreSQL
+    // 2. Auto-delete subscribers older than 2 days
+    await autoDeleteExpiredSubscribers();
+
+    // 3. Ensure all active file subscribers exist in PostgreSQL
     const fileSubs = readSubscribersFromFile();
     for (const sub of fileSubs) {
       await pgQuery(`
@@ -172,6 +210,7 @@ export async function addSubscriber(rawEmail) {
  * Get all subscribers
  */
 export async function getSubscribers() {
+  await autoDeleteExpiredSubscribers();
   if (isPostgresConfigured()) {
     try {
       if (!tableSynced) {

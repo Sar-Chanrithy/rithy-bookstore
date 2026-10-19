@@ -33,7 +33,8 @@ function writeUsersToFile(users) {
 
 let usersSynced = false;
 export async function ensureUsersTableSynced() {
-  if (!isPostgresConfigured()) return;
+  if (usersSynced || !isPostgresConfigured()) return;
+  usersSynced = true;
   try {
     // 1. Create users table if not exists
     await pgQuery(`
