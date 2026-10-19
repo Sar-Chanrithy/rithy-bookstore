@@ -98,6 +98,28 @@ export default function AdminPage() {
     }
   };
 
+  const [syncing, setSyncing] = useState(false);
+
+  // Sync / Import all 43 books to Neon Cloud PostgreSQL
+  const handleSyncBooks = async () => {
+    try {
+      setSyncing(true);
+      showToast('Importing all 43 books into Neon Cloud Database... ⏳');
+      const res = await fetch('/api/sync-books');
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || 'Successfully synced all books to Neon!');
+        await fetchBooks();
+      } else {
+        showToast(data.error || 'Sync failed', 'error');
+      }
+    } catch (err) {
+      showToast('Error syncing books: ' + err.message, 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   useEffect(() => {
     fetchBooks();
   }, []);
@@ -325,15 +347,41 @@ export default function AdminPage() {
           </p>
         </div>
 
-        <button 
-          type="button" 
-          className="bookoe-btn-refine"
-          onClick={handleOpenAdd}
-          style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.4rem', margin: 0 }}
-        >
-          <Plus size={18} />
-          <span>Add New Book</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button 
+            type="button" 
+            onClick={handleSyncBooks}
+            disabled={syncing}
+            style={{ 
+              width: 'auto', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem', 
+              padding: '0.75rem 1.3rem', 
+              margin: 0,
+              background: syncing ? '#94a3b8' : '#0284c7',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 700,
+              cursor: syncing ? 'not-allowed' : 'pointer',
+              fontSize: '0.88rem'
+            }}
+          >
+            <Sparkles size={18} />
+            <span>{syncing ? 'Importing...' : 'Sync 43 Books to Cloud ☁️'}</span>
+          </button>
+
+          <button 
+            type="button" 
+            className="bookoe-btn-refine"
+            onClick={handleOpenAdd}
+            style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.4rem', margin: 0 }}
+          >
+            <Plus size={18} />
+            <span>Add New Book</span>
+          </button>
+        </div>
       </div>
 
       {/* Metrics / Stats Cards */}

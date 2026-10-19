@@ -40,9 +40,9 @@ export async function getPool() {
       if (connStr) {
         pool = new pg.Pool({
           connectionString: connStr,
-          ssl: process.env.NODE_ENV === 'production' && !connStr.includes('localhost') 
-            ? { rejectUnauthorized: false } 
-            : false,
+          ssl: (connStr.includes('localhost') || connStr.includes('127.0.0.1'))
+            ? false
+            : { rejectUnauthorized: false },
         });
       } else {
         pool = new pg.Pool({

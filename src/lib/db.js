@@ -309,7 +309,34 @@ async function ensurePgSynced() {
     await ensureUsersTableSynced();
     await ensureSubscribersTableSynced();
     await ensureOrdersTableSynced();
-    if (pgSynced) return;
+    // 1. Ensure books table exists
+    await pgQuery(`
+      CREATE TABLE IF NOT EXISTS books (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        author VARCHAR(255) NOT NULL,
+        price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+        original_price NUMERIC(10, 2),
+        discount INT DEFAULT 0,
+        category VARCHAR(100) NOT NULL DEFAULT 'Fantasy',
+        sub_category VARCHAR(255),
+        rating NUMERIC(2, 1) DEFAULT 4.5,
+        reviews_count INT DEFAULT 0,
+        featured BOOLEAN DEFAULT FALSE,
+        on_sale BOOLEAN DEFAULT FALSE,
+        published_year INT DEFAULT 2024,
+        publisher VARCHAR(255) DEFAULT 'Bookoe House',
+        pages INT DEFAULT 300,
+        cover_color VARCHAR(50) DEFAULT '#1e293b',
+        cover_gradient TEXT,
+        cover_accent VARCHAR(50) DEFAULT '#38bdf8',
+        cover_emoji VARCHAR(10) DEFAULT '📖',
+        cover_image TEXT,
+        description TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     const res = await pgQuery('SELECT COUNT(*) as cnt FROM books');
     // ONLY seed initial books if the PostgreSQL table is completely empty (0 rows)
     if (res && res.rows && Number(res.rows[0]?.cnt) === 0) {
@@ -346,6 +373,7 @@ async function ensurePgSynced() {
           b.description
         ]);
       }
+      await pgQuery(`SELECT setval(pg_get_serial_sequence('books', 'id'), COALESCE((SELECT MAX(id) FROM books), 1));`);
     }
     pgSynced = true;
   } catch (err) {

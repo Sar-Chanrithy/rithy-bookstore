@@ -471,6 +471,64 @@ button, input, select, textarea {
 }
 
 /* =========================================================
+   RESPONSIVE ENHANCEMENTS — Phone & Tablet Optimization
+   ========================================================= */
+@media (max-width: 900px) {
+  .bookoe-navbar__inner {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+  .bookoe-search {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+  .bookoe-nav-actions {
+    gap: 0.65rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .bookoe-navbar__inner {
+    padding: 0.6rem 0.85rem;
+  }
+  .bookoe-logo__title {
+    font-size: 1.15rem;
+  }
+  .bookoe-logo__subtitle {
+    display: none;
+  }
+  .bookoe-logo__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  .bookoe-menu-btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+  }
+  .bookoe-action-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .bookoe-nav-actions {
+    gap: 0.45rem;
+  }
+  .bookoe-modal {
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+  }
+  .bookoe-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .bookoe-admin-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
    BREADCRUMB
    ========================================================= */
 .bookoe-breadcrumb {
@@ -1632,8 +1690,9 @@ button, input, select, textarea {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-sm);
+  -webkit-overflow-scrolling: touch;
 }
 
 .bookoe-table-header {
