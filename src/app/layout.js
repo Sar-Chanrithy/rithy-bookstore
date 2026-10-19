@@ -6,7 +6,7 @@ import GlobalModals from '@/components/GlobalModals';
 
 export const metadata = {
   title: 'Rithy Book Store — Online Bookstore',
-  description: 'Explore over 30 million curated book titles with fast delivery and easy online ordering.',
+  description: 'Explore our curated collection of books with fast delivery and easy online ordering in Cambodia.',
 };
 
 export default function RootLayout({ children }) {

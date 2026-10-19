@@ -228,7 +228,7 @@ export default function Navbar() {
           <input
             type="text"
             className="bookoe-search__input"
-            placeholder={t('searchPlaceholder', 'Search over 30 million book titles...')}
+            placeholder={t('searchPlaceholder', 'Search books by title, author, or category...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
