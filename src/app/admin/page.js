@@ -48,6 +48,8 @@ export default function AdminPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     id: '',
     title: '',
@@ -187,25 +189,72 @@ export default function AdminPage() {
     setIsModalOpen(true);
   };
 
-  const handleImageFileChange = (e) => {
+  // Smart image compression: Resizes large images to max 600x900 & compresses to lightweight JPEG (~40-60KB)
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const maxWidth = 600;
+          const maxHeight = 900;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Quality 0.82 produces sharp covers under 60KB
+          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+          resolve(compressed);
+        };
+        img.onerror = () => reject(new Error('Failed to load image file'));
+      };
+      reader.onerror = () => reject(new Error('Failed to read image file'));
+    });
+  };
+
+  const handleImageFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Image file size must be under 5MB', 'error');
+    if (file.size > 15 * 1024 * 1024) {
+      showToast('Image file size must be under 15MB', 'error');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64Url = event.target?.result;
+    try {
+      setIsCompressing(true);
+      showToast('Optimizing cover picture... ⚡');
+      const compressedDataUrl = await compressImage(file);
       setFormData((prev) => ({
         ...prev,
-        coverImage: base64Url,
+        coverImage: compressedDataUrl,
       }));
-      showToast('Cover picture selected! 🖼️');
-    };
-    reader.readAsDataURL(file);
+      showToast('Cover picture optimized & ready! 🖼️');
+    } catch (err) {
+      console.error('Image compression error:', err);
+      showToast('Could not process image: ' + err.message, 'error');
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   // Submit Add or Edit (POST or PUT)
@@ -217,6 +266,7 @@ export default function AdminPage() {
     }
 
     try {
+      setIsSubmitting(true);
       if (isEditing) {
         // UPDATE (PUT)
         const res = await fetch(`/api/books/${formData.id}`, {
@@ -228,7 +278,7 @@ export default function AdminPage() {
         if (resData.success) {
           showToast(`Book "${formData.title}" updated successfully!`);
           setIsModalOpen(false);
-          fetchBooks();
+          await fetchBooks();
         } else {
           showToast(resData.error || 'Update failed', 'error');
         }
@@ -243,13 +293,15 @@ export default function AdminPage() {
         if (resData.success) {
           showToast(`Book "${formData.title}" added to database!`);
           setIsModalOpen(false);
-          fetchBooks();
+          await fetchBooks();
         } else {
           showToast(resData.error || 'Creation failed', 'error');
         }
       }
     } catch (err) {
       showToast('Network error while saving book', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -717,13 +769,16 @@ export default function AdminPage() {
                           cursor: 'pointer',
                           border: '1px dashed var(--primary)',
                           transition: 'all 0.15s ease',
+                          opacity: isCompressing ? 0.6 : 1,
+                          pointerEvents: isCompressing ? 'none' : 'auto',
                         }}
                       >
                         <Upload size={15} />
-                        <span>Upload Picture from Computer</span>
+                        <span>{isCompressing ? 'Compressing Picture... ⏳' : 'Upload Picture from Computer'}</span>
                         <input
                           type="file"
                           accept="image/*"
+                          disabled={isCompressing}
                           onChange={handleImageFileChange}
                           style={{ display: 'none' }}
                         />
@@ -874,10 +929,21 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSubmitting || isCompressing}
                   className="bookoe-btn-refine"
-                  style={{ width: 'auto', padding: '0.65rem 1.5rem', margin: 0 }}
+                  style={{ 
+                    width: 'auto', 
+                    padding: '0.65rem 1.5rem', 
+                    margin: 0,
+                    opacity: (isSubmitting || isCompressing) ? 0.6 : 1,
+                    cursor: (isSubmitting || isCompressing) ? 'not-allowed' : 'pointer'
+                  }}
                 >
-                  {isEditing ? 'Save Changes' : 'Create Book'}
+                  {isSubmitting 
+                    ? 'Saving Book... ⏳' 
+                    : isCompressing 
+                    ? 'Compressing... ⏳' 
+                    : (isEditing ? 'Save Changes' : 'Create Book')}
                 </button>
               </div>
             </form>

@@ -770,6 +770,8 @@ export async function updateBook(id, bookData) {
   if (!id) return null;
 
   // 1. Always update local JSON file store
+  const books = readBooksFromFile();
+  const index = books.findIndex((b) => String(b.id) === String(id));
   let current = index !== -1 ? books[index] : null;
 
   if (!current && isPostgresConfigured()) {
