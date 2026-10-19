@@ -97,8 +97,8 @@ export default function SidebarFilter() {
         {editorPicksOpen && (
           <ul className="bookoe-picks-list">
             <li>
-              <div className="bookoe-pick-item is-active">
-                <span>• {t('bestSales', 'Best Sales')} (105)</span>
+              <div className="bookoe-pick-item is-active" onClick={() => router.push('/?featured=true')}>
+                <span>• {t('bestSales', 'Best Sales')}</span>
               </div>
               <div className="bookoe-pick-nested">
                 <span onClick={() => router.push('/?search=Harry+Potter')}>Harry Potter</span>
@@ -109,25 +109,25 @@ export default function SidebarFilter() {
               </div>
             </li>
             <li className="bookoe-pick-item" onClick={() => router.push('/?sort=rating')}>
-              <span>• {t('sortRating', 'Top Rated')} (21)</span>
+              <span>• {t('sortRating', 'Top Rated')}</span>
             </li>
             <li className="bookoe-pick-item" onClick={() => router.push('/?sort=newest')}>
-              <span>• {t('sortNewest', 'Newest Books')} (52)</span>
+              <span>• {t('sortNewest', 'Newest Books')}</span>
             </li>
             <li className="bookoe-pick-item" onClick={() => router.push('/?featured=true')}>
-              <span>• {t('featuredBooks', 'Featured')} (129)</span>
+              <span>• {t('featuredBooks', 'Featured')}</span>
             </li>
-            <li className="bookoe-pick-item" onClick={() => router.push('/?sort=rating')}>
-              <span>• {t('bestSellers', 'Best Sellers')} (44)</span>
+            <li className="bookoe-pick-item" onClick={() => router.push('/?onSale=true')}>
+              <span>• {t('booksOnSale', 'Books on Sale')}</span>
             </li>
 
             {viewMorePicks && (
               <>
-                <li className="bookoe-pick-item" onClick={() => router.push('/?onSale=true')}>
-                  <span>• {t('specialOffers', 'Special Deals')} (38)</span>
+                <li className="bookoe-pick-item" onClick={() => router.push('/?sort=price-asc')}>
+                  <span>• {t('sortPriceAsc', 'Price: Low to High')}</span>
                 </li>
                 <li className="bookoe-pick-item" onClick={() => router.push('/?category=Biography')}>
-                  <span>• {t('cat_biography', 'Biography')} (15)</span>
+                  <span>• {t('cat_biography', 'Biography')}</span>
                 </li>
               </>
             )}
